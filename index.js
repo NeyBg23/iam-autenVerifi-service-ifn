@@ -7,9 +7,13 @@ app.use(cors({
   origin: ["http://localhost:5173", // ajustar si tu Vite usa otro origen/puerto
   "https://react-vercel-deploy-brown.vercel.app" // producción
   ],
-  credentials: true
+  methods: ["GET","POST","PUT","DELETE","OPTIONS"],  //permite todas las acciones que tu frontend pueda necesitar.
+  allowedHeaders: ["Content-Type","Authorization"], //permite que se envíen headers como Content-Type y Authorization.
+  credentials: true //permite enviar cookies o tokens si tu backend los usa.
 }));
-app.use(express.json());
+
+//  Middleware para parsear JSON
+app.use(express.json()); 
 
 // Ruta pública de prueba
 app.get("/", (req, res) => {    // Ruta pública de prueba
