@@ -5,7 +5,7 @@ import authRoutes from "./src/routes/authRoutes.js";
 const app = express();
 app.use(cors({
   origin: ["http://localhost:5173", // ajustar si tu Vite usa otro origen/puerto
-    "https://react-vercel-deploy-brown.vercel.app " // Solo para produccion establecer el dominio de tu frontend
+    "https://react-vercel-deploy-brown.vercel.app" // Solo para produccion establecer el dominio de tu frontend
     ,"https://iam-auten-verifi-service-ifn.vercel.app", // backend principal en producción
     "https://iam-auten-verifi-service-ifn-git-main-udis-ifn-projects.vercel.app" // dominio temporal de Vercel (preview)"
   ],
