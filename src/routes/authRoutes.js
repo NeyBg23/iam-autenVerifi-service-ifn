@@ -27,6 +27,32 @@ const router = Router();
 // Esta ruta recibe el email y la contraseña del usuario.
 // Si todo está bien, genera un token con su información (rol, nombre, etc.)
 // y se lo devuelve al frontend.
+
+router.post("/perfil", async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) {
+      return res.status(400).json({ error: "Token requerido" });
+    }
+    // Verificamos el token
+    const decoded = jwt.verify(token, process.env.SUPABASE_JWT_SECRET);
+    const userId = decoded.id;
+    // Obtenemos el perfil del usuario desde la tabla "usuarios"
+    const { data: usuarioData, error: userError } = await supabaseServer  
+      .from("usuarios")
+      .select("id, nombre_completo, correo, rol")
+      .eq("id", userId)
+      .single();
+    if (userError) {
+      return res.status(500).json({ error: "Error al obtener perfil del usuario" });
+    }
+    return res.status(200).json({ perfil: usuarioData });
+  } catch (err) {
+    console.error("Error en perfil:", err);
+    return res.status(500).json({ error: "Error en el servidor 😔" });
+  }
+});
+
 router.post("/login", async (req, res) => {
   try {
     // 📥 1️⃣ Leemos los datos que nos envía el usuario desde el frontend
@@ -52,7 +78,7 @@ router.post("/login", async (req, res) => {
 
     // ✅ Si el login fue exitoso, guardamos el usuario que Supabase nos devolvió
     const user = data.user;
-    
+
     const token = jwt.sign(
       {
         id: user.id,
