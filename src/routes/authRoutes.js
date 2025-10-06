@@ -52,7 +52,7 @@ router.post("/perfil", async (req, res) => {
     const userId = decoded.id;
     // Obtenemos el perfil del usuario desde la tabla "usuarios"
     const { data: usuarioData, error: userError } = await supabaseServer  
-      .from("usuario")
+      .from("usuarios")
       .select("id, nombre_completo, correo, rol")
       .eq("id", userId)
       .single();
@@ -123,6 +123,22 @@ router.post("/login", async (req, res) => {
 
     // Respondemos al frontend con un mensaje de error genérico
     return res.status(500).json({ error: "Error en el servidor 😔" });
+  }
+});
+
+
+// 📂 src/routes/auth.js
+router.get("/usuarios", verificarToken, async (req, res) => {
+  try {
+    const { data, error } = await supabaseServer
+      .from("usuarios")
+      .select("id, nombre_completo, correo, rol, descripcion, created_at");
+
+    if (error) throw error;
+
+    res.json({ usuarios: data });
+  } catch (err) {
+    res.status(500).json({ error: "Error al obtener usuarios" });
   }
 });
 
