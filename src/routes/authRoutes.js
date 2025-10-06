@@ -53,41 +53,9 @@ router.post("/login", async (req, res) => {
     // ✅ Si el login fue exitoso, guardamos el usuario que Supabase nos devolvió
     const user = data.user;
 
-    // 👀 4️⃣ Buscamos el rol de este usuario en la tabla "usuarios"
-    // ---------------------------------------------------------
-    // Supabase Auth guarda al usuario en su sistema interno, pero nuestro
-    // proyecto también tiene una tabla personalizada llamada "usuarios"
-    // donde está su “rol” (admin, brigadista, etc).
-    // Aquí buscamos ese rol según el ID del usuario.
-    const { data: usuarioData, error: userError } = await supabaseServer
-      .from("usuarios") // tabla personalizada
-      .select("rol, nombre_completo, correo") // campos que queremos
-      .eq("id", user.id) // buscamos por ID del usuario autenticado
-      .single(); // esperamos solo un resultado
+    console.log(user);
 
-    // ⚠️ Si algo falla al traer el rol, mostramos un error
-    if (userError) {
-      console.error("Error trayendo rol:", userError);
-      return res.status(500).json({ error: "Error al obtener rol del usuario" });
-    }
-
-    // 🪪 5️⃣ Creamos nuestro propio JWT personalizado
-    // ---------------------------------------------------------
-    // Ahora hacemos un NUEVO token JWT que incluye más información:
-    // - id (identificador del usuario)
-    // - correo
-    // - nombre completo
-    // - rol (admin, brigadista, etc.)
-    //
-    // Este token lo firmamos con nuestra clave secreta SUPABASE_JWT_SECRET.
-    // Esa clave está guardada en las variables de entorno (.env).
     const token = jwt.sign(
-      {
-        id: user.id,
-        correo: usuarioData.correo,
-        nombre: usuarioData.nombre_completo,
-        rol: usuarioData.rol || "usuario", // si no tiene rol, le damos “usuario” por defecto
-      },
       process.env.SUPABASE_JWT_SECRET, // clave secreta que solo el servidor conoce
       { expiresIn: "1d" } // ⏳ el token dura 1 día
     );
@@ -104,9 +72,7 @@ router.post("/login", async (req, res) => {
         access_token: token, // este token lo guardará el frontend en localStorage
         user: {
           id: user.id,
-          nombre_completo: usuarioData.nombre_completo,
-          correo: usuarioData.correo,
-          rol: usuarioData.rol,
+          correo: user.correo
         },
       },
     });
