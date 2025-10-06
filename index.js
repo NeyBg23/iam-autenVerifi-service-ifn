@@ -6,7 +6,6 @@ const app = express();
 app.use(cors({
   origin: ["http://localhost:5173", // ajustar si tu Vite usa otro origen/puerto
     "https://react-vercel-deploy-brown.vercel.app" // Solo para produccion establecer el dominio de tu frontend
-    
   ],
   methods: ["GET","POST","PUT","DELETE","OPTIONS"],  //permite todas las acciones que tu frontend pueda necesitar.
   allowedHeaders: ["Content-Type","Authorization"], //permite que se envíen headers como Content-Type y Authorization.
