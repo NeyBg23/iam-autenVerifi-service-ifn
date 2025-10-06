@@ -52,9 +52,7 @@ router.post("/login", async (req, res) => {
 
     // ✅ Si el login fue exitoso, guardamos el usuario que Supabase nos devolvió
     const user = data.user;
-
-    console.log(user);
-
+    
     const token = jwt.sign(
       {
         id: user.id,
