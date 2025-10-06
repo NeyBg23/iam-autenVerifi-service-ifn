@@ -41,6 +41,7 @@ router.get("/verify", (req, res) => {
   }
 });
 
+
 router.post("/perfil", async (req, res) => {
   try {
     const { token } = req.body;
@@ -65,6 +66,7 @@ router.post("/perfil", async (req, res) => {
     return res.status(500).json({ error: "Error en el servidor 😔" });
   }
 });
+
 
 router.post("/login", async (req, res) => {
   try {
