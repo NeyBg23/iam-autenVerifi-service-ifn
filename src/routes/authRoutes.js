@@ -129,21 +129,6 @@ router.post("/login", async (req, res) => {
 });
 
 
-// 📂 src/routes/auth.js
-router.get("/usuarios", verificarToken, async (req, res) => {
-  try {
-    const { data, error } = await supabaseServer
-      .from("usuarios")
-      .select("id, nombre_completo, correo, rol, descripcion, created_at");
-
-    if (error) throw error;
-
-    res.json({ usuarios: data });
-  } catch (err) {
-    res.status(500).json({ error: "Error al obtener usuarios" });
-  }
-});
-
 // 🚀 Exportamos el router
 // ---------------------------------------------------------
 // Esto permite que en el archivo principal (app.js o index.js)
