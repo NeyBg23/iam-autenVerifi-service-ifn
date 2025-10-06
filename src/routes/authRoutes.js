@@ -56,6 +56,10 @@ router.post("/login", async (req, res) => {
     console.log(user);
 
     const token = jwt.sign(
+      {
+        id: user.id,
+        correo: user.correo,
+      },
       process.env.SUPABASE_JWT_SECRET, // clave secreta que solo el servidor conoce
       { expiresIn: "1d" } // ⏳ el token dura 1 día
     );
@@ -72,7 +76,7 @@ router.post("/login", async (req, res) => {
         access_token: token, // este token lo guardará el frontend en localStorage
         user: {
           id: user.id,
-          correo: user.correo
+          correo: user.correo,
         },
       },
     });
