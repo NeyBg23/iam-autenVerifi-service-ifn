@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken";
  * "Muéstrame tu token. Si es bueno, puedes pasar."
  */
 export function verificarToken(req, res, next) {
+  
   // 🕵️ 1️⃣ Buscamos en los headers del request la llave "Authorization"
   // Cuando alguien manda un token, lo manda así:
   // Authorization: Bearer <aquí va el token>
