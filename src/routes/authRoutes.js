@@ -41,21 +41,24 @@ router.get("/verify", (req, res) => {  // Ruta para verificar el token
   }
 });
 
+
 // Este es el post para registrar nuevos usuarios, y sera llamado desde el backend de brigadas.
 
 router.post("/registrar", async (req, res) => {
   try {
-    const { uid, correo, contraseña } = req.body;
+    const { correo, contraseña } = req.body;
 
     const { data, error } = await supabaseServer.auth.admin.createUser({
       email: correo,
       password: contraseña,
-      user_metadata: {
-        external_uid: uid
-      }
     });
 
-    if (error) return res.status(401).json({ error: error.message });
+    if (error) {
+      if (error.status === 400 && /already exists|duplicate/i.test(error.message || "")) {
+        return res.status(409).json({ error: "El correo ya está registrado" });
+      }
+      return res.status(401).json({ error: error.message });
+    }
 
     return res.json({ mensaje: data });
 
