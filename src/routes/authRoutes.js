@@ -45,7 +45,7 @@ router.get("/verify", (req, res) => {
 router.post("/registrar", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const { data, error } = await supabaseServer.auth.signUp({ email, password })
+    const { data, error } = await supabaseServer.auth.admin.createUser({ email, password })
 
     if (error) return res.status(401).json({ error: error.message });
 
