@@ -57,7 +57,7 @@ router.post("/registrar", async (req, res) => {
       if (error.status === 400 && /already exists|duplicate/i.test(error.message || "")) {
         return res.status(409).json({ error: "El correo ya está registrado" });
       }
-      return res.status(401).json({ error: error.message });
+      return res.status(409).json({ error: error.message });
     }
 
     return res.json({ mensaje: data });
