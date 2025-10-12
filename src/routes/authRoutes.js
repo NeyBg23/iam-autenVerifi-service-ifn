@@ -41,6 +41,21 @@ router.get("/verify", (req, res) => {
   }
 });
 
+// Este es el post para registrar nuevos usuarios, y sera llamado desde el backend de brigadas.
+router.post("/registrar", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const { data, error } = await supabaseServer.auth.signUp({ email, password })
+
+    if (error) return res.status(401).json({ error: error.message });
+
+    return res.json({ mensaje: data });
+
+  } catch (err) {
+    res.status(500).json({ error: err})
+  }
+});
+
 router.post("/login", async (req, res) => {
   try {
     // 📥 1️⃣ Leemos los datos que nos envía el usuario desde el frontend
