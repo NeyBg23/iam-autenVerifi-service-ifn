@@ -47,6 +47,8 @@ router.post("/registrar", async (req, res) => {
     const { uid, correo, contraseña } = req.body;
     const { data, error } = await supabaseServer.auth.admin.createUser({ id: uid,  email: correo, password: contraseña })
 
+    //ya miro en brigadas para que cargue id ay que ver backend brigadas aca solo lo creas con supabase pero que creas igual que ebeltran7@udi.edu.co y que roles
+    
     if (error) return res.status(401).json({ error: error.message });
 
     return res.json({ mensaje: data });
