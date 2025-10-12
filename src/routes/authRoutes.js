@@ -28,7 +28,7 @@ const router = Router();
 // Si todo está bien, genera un token con su información (rol, nombre, etc.) 
 // y se lo devuelve al frontend.
 
-router.get("/verify", (req, res) => {
+router.get("/verify", (req, res) => {  // Ruta para verificar el token
   try {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
@@ -44,8 +44,10 @@ router.get("/verify", (req, res) => {
 // Este es el post para registrar nuevos usuarios, y sera llamado desde el backend de brigadas.
 router.post("/registrar", async (req, res) => {
   try {
+
     const { uid, correo, contraseña } = req.body;
     const { data, error } = await supabaseServer.auth.admin.createUser({ id: uid,  email: correo, password: contraseña });
+
 
     //ya miro en brigadas para que cargue id ay que ver backend brigadas aca solo lo creas con supabase pero que creas igual que ebeltran7@udi.edu.co y que roles
 
