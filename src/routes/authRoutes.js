@@ -45,16 +45,19 @@ router.get("/verify", (req, res) => {  // Ruta para verificar el token
 router.post("/registrar", async (req, res) => {
   try {
     const { uid, correo, contraseña } = req.body;
+    console.log(uid, correo, contraseña);
     const { data, error } = await supabaseServer.auth.admin.createUser({ id: uid,  email: correo, password: contraseña });
 
     //ya miro en brigadas para que cargue id ay que ver backend brigadas aca solo lo creas con supabase pero que creas igual que ebeltran7@udi.edu.co y que roles
-
+    console.log(error);
     if (error) return res.status(401).json({ error: error.message });
 
     return res.json({ mensaje: data });
 
   } catch (err) {
-    res.status(500).json({ error: err})
+    console.log(err);
+
+    res.status(500).json({ error: err })
   }
 });
 
