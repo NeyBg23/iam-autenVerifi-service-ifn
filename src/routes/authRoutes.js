@@ -28,7 +28,7 @@ const router = Router();
 // Si todo está bien, genera un token con su información (rol, nombre, etc.) 
 // y se lo devuelve al frontend.
 
-router.get("/verify", (req, res) => {
+router.get("/verify", (req, res) => {  // Ruta para verificar el token
   try {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
@@ -45,7 +45,7 @@ router.get("/verify", (req, res) => {
 router.post("/registrar", async (req, res) => {
   try {
     const { correo, contraseña } = req.body;
-    const { data, error } = await supabaseServer.auth.admin.createUser({ email: correo, password: contraseña })
+    const { data, error } = await supabaseServer.auth.admin.createUser({ email: correo, password: contraseña })  // Crear usuario con Supabase Auth
 
     if (error) return res.status(401).json({ error: error.message });
 
