@@ -46,10 +46,9 @@ router.get("/verify", (req, res) => {  // Ruta para verificar el token
 
 router.post("/registrar", async (req, res) => {
   try {
-    const { uid, correo, contraseña } = req.body;
+    const { correo, contraseña } = req.body;
 
     const { data, error } = await supabaseServer.auth.admin.createUser({
-      id: uid,
       email: correo,
       password: contraseña,
     });
