@@ -17,4 +17,8 @@ if (!supabaseUrl || !supabaseServiceKey) {
 }
 
 // Creamos el cliente de Supabase para el servidor
-export const supabaseServer = createClient(supabaseUrl, supabaseServiceKey);
+export const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: { persistSession: false },
+});
+// Ahora puedes usar `supabaseServer` en tu backend para operaciones administrativas
+// como crear usuarios, validar tokens, etc.

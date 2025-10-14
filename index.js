@@ -1,6 +1,13 @@
+// index.js
+/* Servidor Express para AutenVerifi
+   - Rutas de autenticación (registro, login, etc.)   
+    - Middleware para verificar tokens JWT
+    - Configuración de CORS para seguridad
+*/
 import express from "express";
 import cors from "cors";
 import authRoutes from "./src/routes/authRoutes.js";
+
 
 const app = express();
 app.use(cors({

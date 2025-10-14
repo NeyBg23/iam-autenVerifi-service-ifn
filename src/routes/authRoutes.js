@@ -1,86 +1,58 @@
-// authRouter.js
-import { Router } from "express";
-import { supabaseServer } from "../db/supabaseServerClient.js";
+// src/routes/authRoutes.js
 
-const router = Router();
-
-// Verificar token: usamos el método getUser del SDK con el access token enviado por el cliente
-router.get("/verify", async (req, res) => {
+/* Rutas de autenticación
+   - Registro de usuarios (admin crea usuario con password temporal)
+   - Otras rutas auth si se necesitan
+*/
+import express from 'express';
+import { supabaseServer } from '../sr/db/supabaseServerClient.js'; // ruta al cliente central
+  
+// Crear router de Express    
+const router = express.Router();
+const RESET_PASSWORD_REDIRECT_TO = process.env.RESET_PASSWORD_REDIRECT_TO;
+ // Ruta POST /registrar  
+router.post('/registrar', async (req, res) => {
+  const { email, nombre, cedula, ...rest } = req.body;
+  if (!email) return res.status(400).json({ error: 'email requerido' });
+  // Validar otros campos si es necesario
   try {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
-    if (!token) return res.status(401).json({ error: "Token requerido" });
-
-    const { data, error } = await supabaseServer.auth.getUser(token);
-    if (error || !data?.user) {
-      return res.status(403).json({ error: error?.message || "Token inválido" });
-    }
-
-    return res.json({ valido: true, usuario: data.user });
-  } catch (err) {
-    console.error("Error verify:", err);
-    return res.status(500).json({ error: "Error en el servidor" });
-  }
-});
-
-// Registrar usuario (server-side provisioning)
-// Útil si otro servicio/proceso crea usuarios. Para signups desde el cliente
-// es preferible usar el flujo cliente de Supabase (signUp).
-router.post("/registrar", async (req, res) => {
-  try {
-    const { correo, contraseña, user_metadata = {}, app_metadata = {} } = req.body;
-    if (!correo || !contraseña) {
-      return res.status(400).json({ error: "Correo y contraseña requeridos" });
-    }
-
-    const { data, error } = await supabaseServer.auth.admin.createUser({
-      email: correo.trim().toLowerCase(),
-      password: contraseña,
-      user_metadata,
-      app_metadata,
-    });
-
-    if (error) {
-      if (error.status === 400 && /already exists|duplicate/i.test(error.message || "")) {
-        return res.status(409).json({ error: "El correo ya está registrado" });
-      }
-      return res.status(400).json({ error: error.message || "Error creando usuario" });
-    }
-
-    // Devolvemos info mínima del usuario creado (no tokens)
-    return res.status(201).json({ message: "Usuario creado", user: data.user });
-  } catch (err) {
-    console.error("Error registrar:", err);
-    return res.status(500).json({ error: "Error en el servidor" });
-  }
-});
-
-// Login: devolvemos la session que genera Supabase (access_token + refresh_token)
-router.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email y password requeridos" });
-    }
-
-    const { data, error } = await supabaseServer.auth.signInWithPassword({
+    const tempPassword = Math.random().toString(36).slice(2, 12);
+    const { data: createData, error: createError } = await supabaseServer.auth.admin.createUser({
       email: email.trim().toLowerCase(),
-      password,
+      password: tempPassword,
+      email_confirm: true,
     });
+    // Si hay error o no se creó el usuario
+    if (createError || !createData?.user) {
+      console.error('Error creando usuario:', createError);
+      return res.status(500).json({ error: 'Error creando usuario' });
+    }
+    const userId = createData.user.id;
+    // Insertar datos adicionales en tabla 'usuarios'   
+    const usuarioRow = { id: userId, email: email.trim().toLowerCase(), nombre, cedula, ...rest };
+    const { error: insertError } = await supabaseServer.from('usuarios').insert([usuarioRow]);
 
-    if (error) {
-      return res.status(401).json({ error: error.message });
+    if (insertError) {
+      console.error('Error insertando usuario:', insertError);
+      await supabaseServer.auth.admin.deleteUser(userId).catch((delErr) => {
+        console.error('Error eliminando usuario tras fallo de insert:', delErr);
+      });
+      return res.status(500).json({ error: 'Error guardando usuario' });
     }
 
-    // data.session contiene access_token y refresh_token; devolvemos esto al cliente
-    return res.json({
-      message: "Inicio de sesión exitoso",
-      session: data.session,
-      user: data.user,
+    const { error: resetError } = await supabaseServer.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      redirectTo: RESET_PASSWORD_REDIRECT_TO,
     });
+
+    if (resetError) {
+      console.error('Error solicitando email de reset:', resetError);
+      return res.status(500).json({ error: 'Error enviando email de restablecimiento' });
+    }
+
+    return res.status(201).json({ success: true });
   } catch (err) {
-    console.error("Error login:", err);
-    return res.status(500).json({ error: "Error en el servidor" });
+    console.error('Error /registrar:', err);
+    return res.status(500).json({ error: 'Error interno' });
   }
 });
 
