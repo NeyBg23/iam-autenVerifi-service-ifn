@@ -31,10 +31,15 @@ router.get("/verify", async (req, res) => {
 // es preferible usar el flujo cliente de Supabase (signUp).
 router.post("/registrar", async (req, res) => {
   try {
+
+    console.log("📥 Body recibido:", req.body); 
+
     const { correo, contraseña, user_metadata = {}, app_metadata = {} } = req.body;
     if (!correo || !contraseña) {
       return res.status(400).json({ error: "Correo y contraseña requeridos" });
     }
+
+    console.log("🧠 Creando usuario en Supabase...");
 
     const { data, error } = await supabaseServer.auth.admin.createUser({
       email: correo.trim().toLowerCase(),
@@ -42,6 +47,8 @@ router.post("/registrar", async (req, res) => {
       user_metadata,
       app_metadata,
     });
+
+    console.log("✅ Respuesta Supabase:", data, error);
 
     if (error) {
       if (error.status === 400 && /already exists|duplicate/i.test(error.message || "")) {
