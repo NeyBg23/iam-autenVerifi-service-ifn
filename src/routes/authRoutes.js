@@ -4,6 +4,9 @@ import { supabaseServer } from "../db/supabaseServerClient.js";
 
 const router = Router();
 
+router.use(express.json());  // Middleware para parsear JSON data // habilita lectura de req.body en peticiones JSON. 
+router.use(express.urlencoded({ extended: true }));     // Middleware para parsear URL-encoded data // permite leer formularios también (por compatibilidad).
+
 // Verificar token: usamos el método getUser del SDK con el access token enviado por el cliente
 router.get("/verify", async (req, res) => {
   try {
