@@ -34,16 +34,18 @@ router.post("/registrar", async (req, res) => {
 
     console.log("📥 Body recibido:", req.body); 
 
-    const { correo, contraseña, user_metadata = {}, app_metadata = {} } = req.body;
-    if (!correo || !contraseña) {
+    const { correo, contraseña, password, user_metadata = {}, app_metadata = {} } = req.body;
+    if (!(correo && (contraseña || password))) {
       return res.status(400).json({ error: "Correo y contraseña requeridos" });
     }
+
+    const passFinal = password || contraseña; // Soportamos ambos nombres de campo
 
     console.log("🧠 Creando usuario en Supabase...");
 
     const { data, error } = await supabaseServer.auth.admin.createUser({
       email: correo.trim().toLowerCase(),
-      password: contraseña,
+      password: passFinal,  // Usamos 'password' si está, sino 'contraseña'
       user_metadata,
       app_metadata,
     });
