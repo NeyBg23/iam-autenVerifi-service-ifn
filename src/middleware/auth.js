@@ -4,7 +4,8 @@ import { supabaseServer } from "../db/supabaseServerClient.js";
 /**
  * Middleware para proteger rutas.
  * Espera Authorization: Bearer <access_token> (token de Supabase).
- */
+*/
+
 export async function verificarToken(req, res, next) {
   try {
     const authHeader = req.headers["authorization"];
