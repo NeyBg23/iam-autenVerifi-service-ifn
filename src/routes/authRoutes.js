@@ -29,43 +29,48 @@ router.get("/verify", async (req, res) => {
 // Registrar usuario (server-side provisioning)
 // Útil si otro servicio/proceso crea usuarios. Para signups desde el cliente
 // es preferible usar el flujo cliente de Supabase (signUp).
-router.post("/registrar", async (req, res) => {
+router.post('/registrar', async (req, res) => {
   try {
-
-    console.log("📥 Body recibido:", req.body); 
-
-    const { correo, contraseña, password, user_metadata = {}, app_metadata = {} } = req.body;
-    if (!(correo && (contraseña || password))) {
-      return res.status(400).json({ error: "Correo y contraseña requeridos" });
+    const { correo, contrasea, password } = req.body
+    
+    if (!correo || (!contrasea && !password)) {
+      return res.status(400).json({ error: 'Correo y contraseña requeridos' })
     }
-
-    const passFinal = password || contraseña; // Soportamos ambos nombres de campo
-
-    console.log("🧠 Creando usuario en Supabase...");
-
+    
+    // ✅ VALIDAR DOMINIO PERMITIDO
+    const dominiosPermitidos = ['udi.edu.co', 'gmail.com', 'hotmail.com']
+    const dominioCorreo = correo.toLowerCase().split('@')[1]
+    
+    if (!dominiosPermitidos.includes(dominioCorreo)) {
+      return res.status(403).json({ error: 'User not allowed' })
+    }
+    
+    const passFinal = password || contrasea
+    
+    // ✅ Crear en Supabase Auth
     const { data, error } = await supabaseServer.auth.admin.createUser({
       email: correo.trim().toLowerCase(),
-      password: passFinal,  // Usamos 'password' si está, sino 'contraseña'
-      user_metadata,
-      app_metadata,
-    });
-
-    console.log("✅ Respuesta Supabase:", data, error);
-
+      password: passFinal
+    })
+    
     if (error) {
-      if (error.status === 400 && /already exists|duplicate/i.test(error.message || "")) {
-        return res.status(409).json({ error: "El correo ya está registrado" });
+      if (/already exists|duplicate/i.test(error.message)) {
+        return res.status(409).json({ error: 'El correo ya está registrado' })
       }
-      return res.status(400).json({ error: error.message || "Error creando usuario" });
+      return res.status(400).json({ error: error.message })
     }
-
-    // Devolvemos info mínima del usuario creado (no tokens)
-    return res.status(201).json({ message: "Usuario creado", user: data.user });
+    
+    return res.status(201).json({
+      message: 'Usuario creado en Auth',
+      user: { id: data.user.id, email: data.user.email }
+    })
+    
   } catch (err) {
-    console.error("Error registrar:", err);
-    return res.status(500).json({ error: "Error en el servidor" });
+    console.error('Error registrar:', err)
+    return res.status(500).json({ error: 'Error en el servidor' })
   }
-});
+})
+
 
 // Login: devolvemos la session que genera Supabase (access_token + refresh_token)
 router.post("/login", async (req, res) => {
